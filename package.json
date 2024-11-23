@@ -1,0 +1,14 @@
+{
+    "name": "screen-capture-app",
+    "version": "1.0.0",
+    "description": "Screen Capture App with Area Selection",
+    "main": "main.js",
+    "scripts": {
+      "start": "electron ."
+    },
+    "dependencies": {
+      "electron": "^25.3.0"
+    },
+    "devDependencies": {}
+  }
+  
