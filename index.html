@@ -3,15 +3,36 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Screen Capture</title>
-  <script defer src="renderer.js"></script>
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <title>Capturador</title>
+
+  <!-- Content Security Policy -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline';">
+
+  <style>
+    /* Styles for the images */
+    #gallery {
+      display: flex;
+      flex-wrap: wrap;
+    }
+    #gallery img {
+      width: 100px;
+      height: 100px;
+      margin: 5px;
+    }
+  </style>
+  
 </head>
-<body class="bg-gray-900 text-white flex justify-center items-center h-screen">
-  <div class="text-center">
-    <button id="startCapture" class="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600">
-      Start Screen Capture
-    </button>
-  </div>
+<body>
+  <button id="start-screen-capture">Start Screen Capture</button>
+  <select id="monitor-select" style="display: none;"></select>
+  <button id="confirm-monitor" style="display: none;">Confirm Monitor</button>
+
+  <div id="gallery" style="display: flex; flex-wrap: wrap;"></div>
+
+
+
+
+
+  <script src="./renderer.js"></script>
 </body>
 </html>

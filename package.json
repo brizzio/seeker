@@ -4,11 +4,10 @@
     "description": "Screen Capture App with Area Selection",
     "main": "main.js",
     "scripts": {
-      "start": "electron ."
+        "start": "electron ."
     },
     "dependencies": {
-      "electron": "^25.3.0"
-    },
-    "devDependencies": {}
-  }
-  
+        "electron": "^25.3.0",
+        "sharp": "^0.33.5"
+    }
+}

@@ -7,12 +7,92 @@
   <style>
     body {
       margin: 0;
-      padding: 0;
       overflow: hidden;
-      background-color: rgba(0, 0, 0, 0.5);
       cursor: crosshair;
+      background: rgba(0, 0, 0, 0.5);
+    }
+
+    #selection {
+      position: absolute;
+      border: 2px dashed white;
+      background-color: rgba(255, 255, 255, 0.2);
+      pointer-events: none;
     }
   </style>
 </head>
-<body></body>
+<body>
+  <script>
+    let startX, startY, selectionDiv, isDragging = false;
+
+    const createSelectionDiv = () => {
+      selectionDiv = document.createElement("div");
+      selectionDiv.id = "selection";
+      document.body.appendChild(selectionDiv);
+    };
+
+    const removeSelectionDiv = () => {
+      if (selectionDiv) {
+        document.body.removeChild(selectionDiv);
+        selectionDiv = null;
+      }
+    };
+
+    window.addEventListener("mousedown", (event) => {
+      isDragging = true;
+      startX = event.clientX;
+      startY = event.clientY;
+
+      if (!selectionDiv) createSelectionDiv();
+
+      selectionDiv.style.left = `${startX}px`;
+      selectionDiv.style.top = `${startY}px`;
+      selectionDiv.style.width = "0px";
+      selectionDiv.style.height = "0px";
+    });
+
+    window.addEventListener("mousemove", (event) => {
+      if (!isDragging || !selectionDiv) return;
+
+      const currentX = event.clientX;
+      const currentY = event.clientY;
+
+      const x = Math.min(startX, currentX);
+      const y = Math.min(startY, currentY);
+      const width = Math.abs(currentX - startX);
+      const height = Math.abs(currentY - startY);
+
+      selectionDiv.style.left = `${x}px`;
+      selectionDiv.style.top = `${y}px`;
+      selectionDiv.style.width = `${width}px`;
+      selectionDiv.style.height = `${height}px`;
+    });
+
+    window.addEventListener("mouseup", (event) => {
+  if (!isDragging) return;
+  isDragging = false;
+
+  const endX = event.clientX;
+  const endY = event.clientY;
+
+  const x = Math.min(startX, endX);
+  const y = Math.min(startY, endY);
+  const width = Math.abs(endX - startX);
+  const height = Math.abs(endY - startY);
+
+  console.log("Area selected:", { x, y, width, height }); // Log the selected area
+
+  // Send area to the main process
+  window.electron.send("start-capturing", { x, y, width, height });
+
+  removeSelectionDiv();
+});
+    window.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") {
+        window.electron.send("close-overlay");
+        window.electron.send("stop-capturing");
+        removeSelectionDiv();
+      }
+    });
+  </script>
+</body>
 </html>

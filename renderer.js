@@ -1,87 +1,42 @@
+
+
 window.addEventListener("DOMContentLoaded", () => {
-    let startX, startY, selectionDiv;
-  
-    // Create a selection rectangle dynamically
-    const createSelectionDiv = () => {
-      selectionDiv = document.createElement("div");
-      selectionDiv.style.position = "absolute";
-      selectionDiv.style.border = "2px dashed #fff";
-      selectionDiv.style.backgroundColor = "rgba(255, 255, 255, 0.2)";
-      selectionDiv.style.pointerEvents = "none"; // Ensure the selection box doesn't block mouse events
-      selectionDiv.style.zIndex = "999999"; // Make sure it's on top of other elements
-      document.body.appendChild(selectionDiv);
-    };
-  
-    // Remove the selection rectangle
-    const removeSelectionDiv = () => {
-      if (selectionDiv) {
-        document.body.removeChild(selectionDiv);
-        selectionDiv = null;
-      }
-    };
-  
-    // Start area selection
-    document.body.addEventListener("mousedown", (event) => {
-      event.preventDefault(); // Prevent text selection or other default behavior
-  
-      startX = event.clientX;
-      startY = event.clientY;
-  
-      if (!selectionDiv) createSelectionDiv();
-  
-      // Initialize the selection box with width and height as 0
-      selectionDiv.style.left = `${startX}px`;
-      selectionDiv.style.top = `${startY}px`;
-      selectionDiv.style.width = "0px";
-      selectionDiv.style.height = "0px";
-    });
-  
-    // Update the selection rectangle dynamically as mouse moves
-    document.body.addEventListener("mousemove", (event) => {
-      if (!selectionDiv) return;
-  
-      const currentX = event.clientX;
-      const currentY = event.clientY;
-  
-      const x = Math.min(startX, currentX);
-      const y = Math.min(startY, currentY);
-      const width = Math.abs(currentX - startX);
-      const height = Math.abs(currentY - startY);
-  
-      selectionDiv.style.left = `${x}px`;
-      selectionDiv.style.top = `${y}px`;
-      selectionDiv.style.width = `${width}px`;
-      selectionDiv.style.height = `${height}px`;
-    });
-  
-    // Complete the area selection and notify the main process
-    document.body.addEventListener("mouseup", (event) => {
-      if (!selectionDiv) return;
-  
-      const endX = event.clientX;
-      const endY = event.clientY;
-  
-      const x = Math.min(startX, endX);
-      const y = Math.min(startY, endY);
-      const width = Math.abs(endX - startX);
-      const height = Math.abs(endY - startY);
-  
-      // Send the selected area to the main process
-      window.electron.send("area-selected", { x, y, width, height });
-      removeSelectionDiv();
-    });
-  
-    // Allow the overlay to be closed manually via the Escape key
-    document.body.addEventListener("keydown", (event) => {
-      if (event.key === "Escape") {
-        window.electron.send("close-overlay");
-        removeSelectionDiv();
-      }
-    });
-  
-    // Start area selection when requested
-    window.electron.on("start-selection", () => {
-      createSelectionDiv(); // Initialize the selection area
-    });
+  document.getElementById("start-screen-capture").addEventListener("click", () => {
+    window.electron.send("select-monitor");
   });
-  
+});
+
+
+window.electron.on("monitors-available", (monitors) => {
+  const monitorSelect = document.getElementById("monitor-select");
+  monitorSelect.innerHTML = ""; // Clear existing options
+
+  monitors.forEach((monitor) => {
+    const option = document.createElement("option");
+    option.value = monitor.id;
+    option.textContent = monitor.name;
+    monitorSelect.appendChild(option);
+  });
+
+  monitorSelect.style.display = "block";
+  document.getElementById("confirm-monitor").style.display = "block";
+});
+
+document.getElementById("confirm-monitor").addEventListener("click", () => {
+  const selectedMonitorId = document.getElementById("monitor-select").value;
+  window.electron.send("monitor-selected", Number(selectedMonitorId));
+});
+
+window.electron.on("images-updated", (images) => {
+  const gallery = document.getElementById("gallery");
+  gallery.innerHTML = ""; // Clear previous images
+
+  images.forEach((image) => {
+    const img = document.createElement("img");
+    img.src = image;
+    img.style.width = "100px";
+    img.style.height = "100px";
+    img.style.margin = "5px";
+    gallery.appendChild(img);
+  });
+});
